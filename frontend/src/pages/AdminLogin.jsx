@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { loginAdmin } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 
+
 export default function AdminLogin() {
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
