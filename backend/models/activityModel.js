@@ -12,11 +12,11 @@ const getAllActivities = async () => {
   return rows;
 };
 
-const getActivityById = async (id) => {
+const getAllActivities = async () => {
   const [rows] = await db.query(
-    "SELECT * FROM activities WHERE id = ?", [id]
+    "SELECT * FROM activities ORDER BY pinned DESC, created_at DESC"
   );
-  return rows[0];
+  return rows;
 };
 
 const createActivity = async (title, description, image_url) => {
