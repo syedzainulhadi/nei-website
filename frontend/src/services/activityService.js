@@ -3,7 +3,7 @@ import axios from "axios";
 // const BASE = "http://localhost:5000/api/activities";
 // const BASE = `${import.meta.env.VITE_API_URL}/api/activities`;
 // const BASE = "/api/activities";
-const BASE = `${import.meta.env.VITE_API_URL}/api/achievements`;
+const BASE = `${import.meta.env.VITE_API_URL}/api/activities`;
 
 const authHeader = (token) => ({
   headers: { Authorization: `Bearer ${token}` }
