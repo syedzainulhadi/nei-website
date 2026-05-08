@@ -34,8 +34,8 @@ const create = async (req, res) => {
     //   return res.status(400).json({ message: "❌ Title and description required." });
     // }
     const image_url = req.file
-      ? `http://localhost:5000/uploads/${req.file.filename}`
-      : null;
+  ? `${process.env.BASE_URL}/uploads/${req.file.filename}`
+  : null;
     const id = await createActivity(title, description, image_url);
     res.status(201).json({ message: "✅ Activity created!", id });
   } catch (err) {
@@ -49,8 +49,8 @@ const update = async (req, res) => {
     const existing = await getActivityById(req.params.id);
     if (!existing) return res.status(404).json({ message: "❌ Not found." });
     const image_url = req.file
-      ? `http://localhost:5000/uploads/${req.file.filename}`
-      : existing.image_url;
+  ? `http://localhost:5000/uploads/${req.file.filename}`
+  : existing.image_url;
     await updateActivity(req.params.id, title, description, image_url);
     res.status(200).json({ message: "✅ Activity updated!" });
   } catch (err) {
