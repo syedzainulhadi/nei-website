@@ -295,3 +295,9 @@ WHERE NOT EXISTS (
     SELECT name FROM achievements
     WHERE name = 'Sunita Vernekar'
 ) LIMIT 1;
+
+INSERT INTO admin (username, password)
+VALUES (
+  'admin',
+  '$2a$10$0H6F8QzY8d7j5M5x9YkJ1uN4kP8mL2qT3sW6vX7yZ1aBcDeFgHiJK'
+);
