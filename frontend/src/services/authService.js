@@ -5,7 +5,8 @@
 
 import axios from "axios";
 
-const BASE = "http://localhost:5000/api/admin";
+// const BASE = "http://localhost:5000/api/admin";
+const BASE = `${import.meta.env.VITE_API_URL}/api/achievements`;
 // const BASE = `${import.meta.env.VITE_API_URL}/api/activities`;
 // const BASE = "/api/activities";
 
