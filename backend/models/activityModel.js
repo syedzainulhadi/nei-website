@@ -7,7 +7,7 @@ const db = require("../config/db");
 const getAllActivities = async () => {
   const [rows] = await db.query(
     // Pinned items come first, then by date
-    "SELECT * FROM activities ORDER BY pinned DESC, created_at DESC"
+    "SELECT * FROM activities ORDER BY created_at DESC"
   );
   return rows;
 };
