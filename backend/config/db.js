@@ -9,13 +9,23 @@ dotenv.config();
 
 // Create a connection pool (better than single connection)
 // A pool reuses connections instead of creating a new one every time
+// const pool = mysql.createPool({
+//   host: process.env.DB_HOST,       // usually 'localhost'
+//   user: process.env.DB_USER,       // usually 'root'
+//   password: process.env.DB_PASSWORD,
+//   database: process.env.DB_NAME,
+//   waitForConnections: true,
+//   connectionLimit: 10,             // max 10 simultaneous connections
+//   queueLimit: 0
+// });
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,       // usually 'localhost'
-  user: process.env.DB_USER,       // usually 'root'
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   waitForConnections: true,
-  connectionLimit: 10,             // max 10 simultaneous connections
+  connectionLimit: 10,
   queueLimit: 0
 });
 
