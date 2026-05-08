@@ -31,13 +31,11 @@ const loginAdmin = async (req, res) => {
     }
 
     // Compare entered password with hashed password in DB
-    const isMatch = password === admin.password;
-    if (!isMatch) {
-      return res.status(401).json({ 
-        message: "❌ Invalid username or password." 
-      });
-    }
-
+    if (password !== admin.password) {
+  return res.status(401).json({
+    message: "❌ Invalid username or password."
+  });
+}
     // Create JWT token valid for 1 day
     const token = jwt.sign(
       { id: admin.id, username: admin.username },
