@@ -11,6 +11,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:5175",
+  "https://nei-website-zyye.vercel.app"
   // "https://clutter-reliant-nemesis.ngrok-free.dev"
 ];
 
