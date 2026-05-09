@@ -52,9 +52,27 @@ const cloudinary = require("../config/cloudinary");
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: "nei-website",
-    allowed_formats: ["jpg", "jpeg", "png", "webp", "mp4"],
+  params: async (req, file) => {
+
+    let resourceType = "image";
+
+    if (file.mimetype.startsWith("video")) {
+      resourceType = "video";
+    }
+
+    return {
+      folder: "nei-website",
+      resource_type: resourceType,
+      allowed_formats: [
+        "jpg",
+        "jpeg",
+        "png",
+        "webp",
+        "mp4",
+        "mov",
+        "avi"
+      ],
+    };
   },
 });
 
