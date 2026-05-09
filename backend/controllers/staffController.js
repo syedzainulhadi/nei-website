@@ -3,8 +3,6 @@
 // Handles all Staff CRUD operations
 // =====================================================
 
-const cloudinary = require("../config/cloudinary");
-
 const {
   getAllStaff,
   getStaffByCategory,
@@ -55,15 +53,9 @@ const create = async (req, res) => {
   try {
     const { name, role, qualification, category } = req.body;
 
-    let image_url = null;
-
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "nei-website",
-      });
-
-      image_url = result.secure_url;
-    }
+    const image_url = req.file
+      ? req.file.path
+      : null;
 
     const newId = await createStaff(
       name,
@@ -98,15 +90,9 @@ const update = async (req, res) => {
       });
     }
 
-    let image_url = existing.image_url;
-
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "nei-website",
-      });
-
-      image_url = result.secure_url;
-    }
+    const image_url = req.file
+      ? req.file.path
+      : existing.image_url;
 
     await updateStaff(
       id,
@@ -148,4 +134,10 @@ const remove = async (req, res) => {
   }
 };
 
-module.exports = { getAll, getOne, create, update, remove };
+module.exports = {
+  getAll,
+  getOne,
+  create,
+  update,
+  remove
+};

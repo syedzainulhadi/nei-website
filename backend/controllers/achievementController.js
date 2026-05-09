@@ -7,8 +7,6 @@ const {
   createAchievement, updateAchievement, deleteAchievement
 } = require("../models/achievementModel");
 
-const cloudinary = require("../config/cloudinary");
-
 const getAll = async (req, res) => {
   try {
     const data = await getAllAchievements();
@@ -21,8 +19,13 @@ const getAll = async (req, res) => {
 const getOne = async (req, res) => {
   try {
     const data = await getAchievementById(req.params.id);
-    if (!data) return res.status(404).json({ message: "❌ Not found." });
+
+    if (!data) {
+      return res.status(404).json({ message: "❌ Not found." });
+    }
+
     res.status(200).json(data);
+
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to fetch achievement." });
   }
@@ -30,28 +33,40 @@ const getOne = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const { name, class: cls, percentage, description, year, category } = req.body;
+    const {
+      name,
+      class: cls,
+      percentage,
+      description,
+      year,
+      category
+    } = req.body;
 
     if (!name || !cls || !year || !category) {
-      return res.status(400).json({ message: "❌ Name, class, year and category are required." });
+      return res.status(400).json({
+        message: "❌ Name, class, year and category are required."
+      });
     }
 
-    
+    const image_url = req.file
+      ? req.file.path
+      : null;
 
-let image_url = "";
-
-if (req.file) {
-  const result = await cloudinary.uploader.upload(req.file.path, {
-    folder: "nei-website",
-  });
-
-  image_url = result.secure_url;
-}
     const id = await createAchievement({
-      name, class: cls, percentage, description, image_url, year, category
+      name,
+      class: cls,
+      percentage,
+      description,
+      image_url,
+      year,
+      category
     });
 
-    res.status(201).json({ message: "✅ Achievement added!", id });
+    res.status(201).json({
+      message: "✅ Achievement added!",
+      id
+    });
+
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to add achievement." });
   }
@@ -59,25 +74,39 @@ if (req.file) {
 
 const update = async (req, res) => {
   try {
-    const { name, class: cls, percentage, description, year, category } = req.body;
+    const {
+      name,
+      class: cls,
+      percentage,
+      description,
+      year,
+      category
+    } = req.body;
+
     const existing = await getAchievementById(req.params.id);
-    if (!existing) return res.status(404).json({ message: "❌ Not found." });
 
-    let image_url = existing.image_url;
+    if (!existing) {
+      return res.status(404).json({ message: "❌ Not found." });
+    }
 
-if (req.file) {
-  const result = await cloudinary.uploader.upload(req.file.path, {
-    folder: "nei-website",
-  });
-
-  image_url = result.secure_url;
-}
+    const image_url = req.file
+      ? req.file.path
+      : existing.image_url;
 
     await updateAchievement(req.params.id, {
-      name, class: cls, percentage, description, image_url, year, category
+      name,
+      class: cls,
+      percentage,
+      description,
+      image_url,
+      year,
+      category
     });
 
-    res.status(200).json({ message: "✅ Achievement updated!" });
+    res.status(200).json({
+      message: "✅ Achievement updated!"
+    });
+
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to update achievement." });
   }
@@ -86,11 +115,24 @@ if (req.file) {
 const remove = async (req, res) => {
   try {
     const affected = await deleteAchievement(req.params.id);
-    if (!affected) return res.status(404).json({ message: "❌ Not found." });
-    res.status(200).json({ message: "✅ Achievement deleted!" });
+
+    if (!affected) {
+      return res.status(404).json({ message: "❌ Not found." });
+    }
+
+    res.status(200).json({
+      message: "✅ Achievement deleted!"
+    });
+
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to delete achievement." });
   }
 };
 
-module.exports = { getAll, getOne, create, update, remove };
+module.exports = {
+  getAll,
+  getOne,
+  create,
+  update,
+  remove
+};

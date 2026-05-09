@@ -2,8 +2,6 @@
 // controllers/videoController.js
 // =====================================================
 
-const cloudinary = require("../config/cloudinary");
-
 const {
   getAllVideos, getVideoById,
   createVideo, updateVideo,
@@ -43,12 +41,7 @@ const create = async (req, res) => {
         });
       }
 
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: "video",
-        folder: "nei-website/videos",
-      });
-
-      video_url = result.secure_url;
+      video_url = req.file.path;
     }
 
     const id = await createVideo(
@@ -76,19 +69,14 @@ const update = async (req, res) => {
     const existing = await getVideoById(req.params.id);
 
     if (!existing) {
-      return res.status(404).json({ message: "❌ Not found." });
-    }
-
-    let video_url = existing.video_url;
-
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: "video",
-        folder: "nei-website/videos",
+      return res.status(404).json({
+        message: "❌ Not found."
       });
-
-      video_url = result.secure_url;
     }
+
+    const video_url = req.file
+      ? req.file.path
+      : existing.video_url;
 
     await updateVideo(
       req.params.id,
@@ -114,7 +102,9 @@ const pin = async (req, res) => {
     await togglePin(req.params.id, pinned ? 1 : 0);
 
     res.status(200).json({
-      message: pinned ? "📌 Video pinned!" : "Video unpinned."
+      message: pinned
+        ? "📌 Video pinned!"
+        : "Video unpinned."
     });
 
   } catch (err) {
@@ -127,7 +117,9 @@ const remove = async (req, res) => {
     const affected = await deleteVideo(req.params.id);
 
     if (!affected) {
-      return res.status(404).json({ message: "❌ Not found." });
+      return res.status(404).json({
+        message: "❌ Not found."
+      });
     }
 
     res.status(200).json({
@@ -139,4 +131,10 @@ const remove = async (req, res) => {
   }
 };
 
-module.exports = { getAll, create, update, pin, remove };
+module.exports = {
+  getAll,
+  create,
+  update,
+  pin,
+  remove
+};

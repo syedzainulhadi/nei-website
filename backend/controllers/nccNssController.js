@@ -3,8 +3,6 @@
 // NCC & NSS combined
 // =====================================================
 
-const cloudinary = require("../config/cloudinary");
-
 const {
   getAllActivities, getActivityById,
   createActivity, updateActivity,
@@ -24,19 +22,20 @@ const create = async (req, res) => {
   try {
     const { title, description } = req.body;
 
-    let image_url = null;
+    const image_url = req.file
+      ? req.file.path
+      : null;
 
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "nei-website",
-      });
+    const id = await createActivity(
+      title,
+      description,
+      image_url
+    );
 
-      image_url = result.secure_url;
-    }
-
-    const id = await createActivity(title, description, image_url);
-
-    res.status(201).json({ message: "✅ Activity added!", id });
+    res.status(201).json({
+      message: "✅ Activity added!",
+      id
+    });
 
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to add activity." });
@@ -53,24 +52,20 @@ const update = async (req, res) => {
       return res.status(404).json({ message: "❌ Not found." });
     }
 
-    let image_url = existing.image_url;
-
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "nei-website",
-      });
-
-      image_url = result.secure_url;
-    }
+    const image_url = req.file
+      ? req.file.path
+      : existing.image_url;
 
     await updateActivity(
       req.params.id,
       title,
-      description,
+     description,
       image_url
     );
 
-    res.status(200).json({ message: "✅ Activity updated!" });
+    res.status(200).json({
+      message: "✅ Activity updated!"
+    });
 
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to update." });
@@ -85,7 +80,9 @@ const pin = async (req, res) => {
     await togglePin(req.params.id, pinned ? 1 : 0);
 
     res.status(200).json({
-      message: pinned ? "📌 Activity pinned!" : "Activity unpinned."
+      message: pinned
+        ? "📌 Activity pinned!"
+        : "Activity unpinned."
     });
 
   } catch (err) {
@@ -101,11 +98,19 @@ const remove = async (req, res) => {
       return res.status(404).json({ message: "❌ Not found." });
     }
 
-    res.status(200).json({ message: "✅ Activity deleted!" });
+    res.status(200).json({
+      message: "✅ Activity deleted!"
+    });
 
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to delete." });
   }
 };
 
-module.exports = { getAll, create, update, pin, remove };
+module.exports = {
+  getAll,
+  create,
+  update,
+  pin,
+  remove
+};
