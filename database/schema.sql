@@ -301,3 +301,37 @@ VALUES (
   'admin',
   '$2a$10$0H6F8QzY8d7j5M5x9YkJ1uN4kP8mL2qT3sW6vX7yZ1aBcDeFgHiJK'
 );
+
+-- /////additional things////
+TRUNCATE TABLE admin;
+
+INSERT INTO admin (username, password)
+VALUES ('admin', 'admin123');
+
+UPDATE activities
+SET image_url = REPLACE(
+  image_url,
+  'http://localhost:5000',
+  'https://nei-website.onrender.com'
+);
+UPDATE achievements
+SET image_url = REPLACE(
+  image_url,
+  'http://localhost:5000',
+  'https://nei-website.onrender.com'
+);
+
+DELETE FROM admin;
+
+UPDATE admin
+SET password = 'kakodkarsneigoa123'
+WHERE username = 'kakodkarsnei';
+
+SELECT * FROM admin;
+
+SET SQL_SAFE_UPDATES = 0;
+
+ALTER TABLE activities
+ADD COLUMN pinned TINYINT(1) DEFAULT 0;
+ALTER TABLE videos
+ADD COLUMN pinned TINYINT(1) DEFAULT 0;
