@@ -3,6 +3,8 @@
 // Handles all Staff CRUD operations
 // =====================================================
 
+const cloudinary = require("../config/cloudinary");
+
 const {
   getAllStaff,
   getStaffByCategory,
@@ -15,8 +17,6 @@ const {
 // GET /api/staff - Get all staff
 const getAll = async (req, res) => {
   try {
-    // Optional: filter by category using query param
-    // Example: /api/staff?category=teaching
     const { category } = req.query;
 
     const staff = category
@@ -24,6 +24,7 @@ const getAll = async (req, res) => {
       : await getAllStaff();
 
     res.status(200).json(staff);
+
   } catch (err) {
     console.error("Get staff error:", err.message);
     res.status(500).json({ message: "❌ Failed to fetch staff." });
@@ -34,76 +35,113 @@ const getAll = async (req, res) => {
 const getOne = async (req, res) => {
   try {
     const member = await getStaffById(req.params.id);
+
     if (!member) {
-      return res.status(404).json({ message: "❌ Staff member not found." });
+      return res.status(404).json({
+        message: "❌ Staff member not found."
+      });
     }
+
     res.status(200).json(member);
+
   } catch (err) {
     console.error("Get staff error:", err.message);
     res.status(500).json({ message: "❌ Failed to fetch staff member." });
   }
 };
 
-// POST /api/staff - Add new staff (admin only)
+// POST /api/staff - Add new staff
 const create = async (req, res) => {
   try {
     const { name, role, qualification, category } = req.body;
 
-    // if (!name || !role || !category) {
-    //   return res.status(400).json({ 
-    //     message: "❌ Name, role, and category are required." 
-    //   });
-    // }
+    let image_url = null;
 
-    const image_url = req.file
-      ? req.file.path
-      : null;
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "nei-website",
+      });
+
+      image_url = result.secure_url;
+    }
 
     const newId = await createStaff(
-      name, role, qualification, image_url, category
+      name,
+      role,
+      qualification,
+      image_url,
+      category
     );
 
-    res.status(201).json({ 
-      message: "✅ Staff member added!", 
-      id: newId 
+    res.status(201).json({
+      message: "✅ Staff member added!",
+      id: newId
     });
+
   } catch (err) {
     console.error("Create staff error:", err.message);
     res.status(500).json({ message: "❌ Failed to add staff member." });
   }
 };
 
-// PUT /api/staff/:id - Update staff (admin only)
+// PUT /api/staff/:id - Update staff
 const update = async (req, res) => {
   try {
     const { name, role, qualification, category } = req.body;
     const { id } = req.params;
 
     const existing = await getStaffById(id);
+
     if (!existing) {
-      return res.status(404).json({ message: "❌ Staff member not found." });
+      return res.status(404).json({
+        message: "❌ Staff member not found."
+      });
     }
 
-    const image_url = req.file
-      ? req.file.path
-      : existing.image_url;
+    let image_url = existing.image_url;
 
-    await updateStaff(id, name, role, qualification, image_url, category);
-    res.status(200).json({ message: "✅ Staff member updated!" });
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "nei-website",
+      });
+
+      image_url = result.secure_url;
+    }
+
+    await updateStaff(
+      id,
+      name,
+      role,
+      qualification,
+      image_url,
+      category
+    );
+
+    res.status(200).json({
+      message: "✅ Staff member updated!"
+    });
+
   } catch (err) {
     console.error("Update staff error:", err.message);
     res.status(500).json({ message: "❌ Failed to update staff member." });
   }
 };
 
-// DELETE /api/staff/:id - Delete staff (admin only)
+// DELETE /api/staff/:id
 const remove = async (req, res) => {
   try {
     const affected = await deleteStaff(req.params.id);
+
     if (!affected) {
-      return res.status(404).json({ message: "❌ Staff member not found." });
+      return res.status(404).json({
+        message: "❌ Staff member not found."
+      });
     }
-    res.status(200).json({ message: "✅ Staff member deleted!" });
+
+    res.status(200).json({
+      message: "✅ Staff member deleted!"
+    });
+
   } catch (err) {
     console.error("Delete staff error:", err.message);
     res.status(500).json({ message: "❌ Failed to delete staff member." });

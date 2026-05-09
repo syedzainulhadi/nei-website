@@ -2,6 +2,8 @@
 // controllers/videoController.js
 // =====================================================
 
+const cloudinary = require("../config/cloudinary");
+
 const {
   getAllVideos, getVideoById,
   createVideo, updateVideo,
@@ -20,23 +22,47 @@ const getAll = async (req, res) => {
 const create = async (req, res) => {
   try {
     const { title, subtitle, type } = req.body;
-    // if (!title) {
-    //   return res.status(400).json({ message: "❌ Title is required." });
-    // }
+
     let video_url = "";
+
     if (type === "youtube") {
+
       video_url = req.body.video_url;
+
       if (!video_url) {
-        return res.status(400).json({ message: "❌ YouTube URL required." });
+        return res.status(400).json({
+          message: "❌ YouTube URL required."
+        });
       }
+
     } else {
+
       if (!req.file) {
-        return res.status(400).json({ message: "❌ Video file required." });
+        return res.status(400).json({
+          message: "❌ Video file required."
+        });
       }
-      video_url = req.file.path;
+
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        resource_type: "video",
+        folder: "nei-website/videos",
+      });
+
+      video_url = result.secure_url;
     }
-    const id = await createVideo(title, subtitle, video_url, type || "mp4");
-    res.status(201).json({ message: "✅ Video added!", id });
+
+    const id = await createVideo(
+      title,
+      subtitle,
+      video_url,
+      type || "mp4"
+    );
+
+    res.status(201).json({
+      message: "✅ Video added!",
+      id
+    });
+
   } catch (err) {
     console.error("Create video error:", err.message);
     res.status(500).json({ message: "❌ Failed to add video." });
@@ -46,10 +72,35 @@ const create = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { title, subtitle } = req.body;
+
     const existing = await getVideoById(req.params.id);
-    if (!existing) return res.status(404).json({ message: "❌ Not found." });
-    await updateVideo(req.params.id, title, subtitle, existing.video_url);
-    res.status(200).json({ message: "✅ Video updated!" });
+
+    if (!existing) {
+      return res.status(404).json({ message: "❌ Not found." });
+    }
+
+    let video_url = existing.video_url;
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        resource_type: "video",
+        folder: "nei-website/videos",
+      });
+
+      video_url = result.secure_url;
+    }
+
+    await updateVideo(
+      req.params.id,
+      title,
+      subtitle,
+      video_url
+    );
+
+    res.status(200).json({
+      message: "✅ Video updated!"
+    });
+
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to update video." });
   }
@@ -59,10 +110,13 @@ const update = async (req, res) => {
 const pin = async (req, res) => {
   try {
     const { pinned } = req.body;
+
     await togglePin(req.params.id, pinned ? 1 : 0);
+
     res.status(200).json({
       message: pinned ? "📌 Video pinned!" : "Video unpinned."
     });
+
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to update pin." });
   }
@@ -71,8 +125,15 @@ const pin = async (req, res) => {
 const remove = async (req, res) => {
   try {
     const affected = await deleteVideo(req.params.id);
-    if (!affected) return res.status(404).json({ message: "❌ Not found." });
-    res.status(200).json({ message: "✅ Video deleted!" });
+
+    if (!affected) {
+      return res.status(404).json({ message: "❌ Not found." });
+    }
+
+    res.status(200).json({
+      message: "✅ Video deleted!"
+    });
+
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to delete video." });
   }

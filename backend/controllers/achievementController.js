@@ -7,6 +7,8 @@ const {
   createAchievement, updateAchievement, deleteAchievement
 } = require("../models/achievementModel");
 
+const cloudinary = require("../config/cloudinary");
+
 const getAll = async (req, res) => {
   try {
     const data = await getAllAchievements();
@@ -34,10 +36,17 @@ const create = async (req, res) => {
       return res.status(400).json({ message: "❌ Name, class, year and category are required." });
     }
 
-    const image_url = req.file
-      ? req.file.path
-      : null;
+    
 
+let image_url = "";
+
+if (req.file) {
+  const result = await cloudinary.uploader.upload(req.file.path, {
+    folder: "nei-website",
+  });
+
+  image_url = result.secure_url;
+}
     const id = await createAchievement({
       name, class: cls, percentage, description, image_url, year, category
     });
@@ -54,9 +63,15 @@ const update = async (req, res) => {
     const existing = await getAchievementById(req.params.id);
     if (!existing) return res.status(404).json({ message: "❌ Not found." });
 
-    const image_url = req.file
-      ? req.file.path
-      : existing.image_url;
+    let image_url = existing.image_url;
+
+if (req.file) {
+  const result = await cloudinary.uploader.upload(req.file.path, {
+    folder: "nei-website",
+  });
+
+  image_url = result.secure_url;
+}
 
     await updateAchievement(req.params.id, {
       name, class: cls, percentage, description, image_url, year, category

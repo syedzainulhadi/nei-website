@@ -2,6 +2,8 @@
 // controllers/activityController.js
 // =====================================================
 
+const cloudinary = require("../config/cloudinary");
+
 const {
   getAllActivities, getActivityById,
   createActivity, updateActivity,
@@ -30,13 +32,19 @@ const getOne = async (req, res) => {
 const create = async (req, res) => {
   try {
     const { title, description } = req.body;
-    // if (!title || !description) {
-    //   return res.status(400).json({ message: "❌ Title and description required." });
-    // }
-    const image_url = req.file
-  ? req.file.path
-  : null;
+
+    let image_url = null;
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "nei-website",
+      });
+
+      image_url = result.secure_url;
+    }
+
     const id = await createActivity(title, description, image_url);
+
     res.status(201).json({ message: "✅ Activity created!", id });
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to create activity." });
@@ -46,13 +54,32 @@ const create = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { title, description } = req.body;
+
     const existing = await getActivityById(req.params.id);
-    if (!existing) return res.status(404).json({ message: "❌ Not found." });
-    const image_url = req.file
-  ? req.file.path
-  : existing.image_url;
-    await updateActivity(req.params.id, title, description, image_url);
+
+    if (!existing) {
+      return res.status(404).json({ message: "❌ Not found." });
+    }
+
+    let image_url = existing.image_url;
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "nei-website",
+      });
+
+      image_url = result.secure_url;
+    }
+
+    await updateActivity(
+      req.params.id,
+      title,
+      description,
+      image_url
+    );
+
     res.status(200).json({ message: "✅ Activity updated!" });
+
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to update activity." });
   }
@@ -62,10 +89,13 @@ const update = async (req, res) => {
 const pin = async (req, res) => {
   try {
     const { pinned } = req.body;
+
     await togglePin(req.params.id, pinned ? 1 : 0);
+
     res.status(200).json({
       message: pinned ? "📌 Activity pinned!" : "Activity unpinned."
     });
+
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to update pin." });
   }
@@ -74,8 +104,13 @@ const pin = async (req, res) => {
 const remove = async (req, res) => {
   try {
     const affected = await deleteActivity(req.params.id);
-    if (!affected) return res.status(404).json({ message: "❌ Not found." });
+
+    if (!affected) {
+      return res.status(404).json({ message: "❌ Not found." });
+    }
+
     res.status(200).json({ message: "✅ Activity deleted!" });
+
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to delete activity." });
   }
