@@ -35,7 +35,7 @@ const create = async (req, res) => {
     }
 
     const image_url = req.file
-      ? `${process.env.BASE_URL}/uploads/${req.file.filename}`
+      ? req.file.path
       : null;
 
     const id = await createAchievement({
@@ -55,7 +55,7 @@ const update = async (req, res) => {
     if (!existing) return res.status(404).json({ message: "❌ Not found." });
 
     const image_url = req.file
-      ? `${process.env.BASE_URL}/uploads/${req.file.filename}`
+      ? req.file.path
       : existing.image_url;
 
     await updateAchievement(req.params.id, {

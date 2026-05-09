@@ -56,7 +56,7 @@ const create = async (req, res) => {
     // }
 
     const image_url = req.file
-      ? `${process.env.BASE_URL}/uploads/${req.file.filename}`
+      ? req.file.path
       : null;
 
     const newId = await createStaff(
@@ -85,7 +85,7 @@ const update = async (req, res) => {
     }
 
     const image_url = req.file
-      ? `${process.env.BASE_URL}/uploads/${req.file.filename}`
+      ? req.file.path
       : existing.image_url;
 
     await updateStaff(id, name, role, qualification, image_url, category);

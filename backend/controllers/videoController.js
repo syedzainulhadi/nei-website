@@ -33,7 +33,7 @@ const create = async (req, res) => {
       if (!req.file) {
         return res.status(400).json({ message: "❌ Video file required." });
       }
-      video_url = `${process.env.BASE_URL}/uploads/${req.file.filename}`;
+      video_url = req.file.path;
     }
     const id = await createVideo(title, subtitle, video_url, type || "mp4");
     res.status(201).json({ message: "✅ Video added!", id });
